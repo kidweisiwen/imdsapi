@@ -710,86 +710,72 @@ class AppController {
         println "newData=" + excelData.size()
 
         def jsonSlurper = new JsonSlurper()
-
-        oldData.eachWithIndex { it, index ->
+        println excelData
+        excelData.eachWithIndex { it1, index ->
             def findFlag = null
-            def parent = jsonSlurper.parseText(it.parent)
-//            def parentArray = []
-//            parent.each{p->
-//                def array = []
-//                p.each{p1->
-//                    array.add(p1)
-//                }
-//                parentArray.add(array)
-//            }
-
-            def levelOld = (it.level != null && it.level != "") ? (it.level as Float) : ""
-            def jcPartNo = (it.jcpartno != null && it.jcpartno != "") ? it.jcpartno : ""
-            def oemPartNo = (it.oempartno != null && it.oempartno != "") ? it.oempartno : ""
-            if ((jcPartNo + "").isFloat()) {
-                jcPartNo = jcPartNo as Float
-            }
-            if ((oemPartNo + "").isFloat()) {
-                oemPartNo = oemPartNo as Float
-            }
-
-
             def foundFlag = false
-            def data = null
-            def data1 = [:]
-            data1.jcPartNo = it.jcPartNo
-            data1.oemPartNo = it.oemPartNo
-            data1.partDesc = it.partDesc
-            data1.level = it.level
-            def newlevelsList = []
-            jsonSlurper.parseText(it.levels).each { nl ->
-                def key = nl.keySet()[0]
-                newlevelsList.add("{\"" + key + "\":\"" + nl[key] + "\"}")
+
+            def data = it1
+            def levelNew = (it1.level != null && it1.level != "") ? (it1.level as Float) : ""
+            def jcPartNoNew = it1.jcPartNo != null ? (it1.jcPartNo + "").trim() : ""
+            def oemPartNoNew = it1.oemPartNo != null ? (it1.oemPartNo + "").trim() : ""
+
+            if ((jcPartNoNew + "").isFloat()) {
+                jcPartNoNew = jcPartNoNew as Float
             }
-            data1.levels = newlevelsList
-
-            data1.info = jsonSlurper.parseText(it.info)
-            data1._PARENT = jsonSlurper.parseText(it.parent)
-            data1.wig = it.wig ? it.wig : ""
-            data1.st = it.st ? it.st : ""
-            data1.cm = it.cm ? it.cm : ""
-            data1.supplier = it.supplier ? it.supplier : ""
-            data1.sici = it.sici ? it.sici : ""
-            data1.sds = it.sds ? it.sds : ""
-            data1.jici = it.jici ? it.jici : ""
-            data1.ppmcNo = it.ppmcNo ? it.ppmcNo : ""
-            data1.colourName = it.colourName ? it.colourName : ""
-            data1.scjp = it.scjp ? it.scjp : ""
-            data1.pden = it.pden ? it.pden : ""
-            data1.cd = it.cd ? it.cd : ""
-            data1.ccam = it.ccam ? it.ccam : ""
-            data1.ccab = it.ccab ? it.ccab : ""
-            data1.dsiic = it.dsiic ? it.dsiic : ""
+            if ((oemPartNoNew + "").isFloat()) {
+                oemPartNoNew = oemPartNoNew as Float
+            }
 
 
+            def data1 = [:]
+            oldData.find { it ->
 
-            excelData.find { it1 ->
-                def levelNew = (it1.level != null && it1.level != "") ? (it1.level as Float) : ""
-                def jcPartNoNew = it1.jcPartNo != null ? (it1.jcPartNo + "").trim() : ""
-                def oemPartNoNew = it1.oemPartNo != null ? (it1.oemPartNo + "").trim() : ""
 
-                if ((jcPartNoNew + "").isFloat()) {
-                    jcPartNoNew = jcPartNoNew as Float
+                def parent = jsonSlurper.parseText(it.parent)
+
+
+                def levelOld = (it.level != null && it.level != "") ? (it.level as Float) : ""
+                def jcPartNo = (it.jcpartno != null && it.jcpartno != "") ? it.jcpartno : ""
+                def oemPartNo = (it.oempartno != null && it.oempartno != "") ? it.oempartno : ""
+                if ((jcPartNo + "").isFloat()) {
+                    jcPartNo = jcPartNo as Float
                 }
-                if ((oemPartNoNew + "").isFloat()) {
-                    oemPartNoNew = oemPartNoNew as Float
+                if ((oemPartNo + "").isFloat()) {
+                    oemPartNo = oemPartNo as Float
                 }
-                //println parent.size()
-                //println it1['_PARENT'].size()
-                def parentFlag = true
-//                def newParentArray = []
-//                it1['_PARENT'].each{p->
-//                    def array = []
-//                    p.each{p1->
-//                        array.add(p1)
-//                    }
-//                    newParentArray.add(array)
-//                }
+
+
+
+
+                data1.jcPartNo = it.jcPartNo
+                data1.oemPartNo = it.oemPartNo
+                data1.partDesc = it.partDesc
+                data1.level = it.level
+                def newlevelsList = []
+                jsonSlurper.parseText(it.levels).each { nl ->
+                    def key = nl.keySet()[0]
+                    newlevelsList.add("{\"" + key + "\":\"" + nl[key] + "\"}")
+                }
+                data1.levels = newlevelsList
+
+                data1.info = jsonSlurper.parseText(it.info)
+                data1._PARENT = jsonSlurper.parseText(it.parent)
+                data1.wig = it.wig ? it.wig : ""
+                data1.st = it.st ? it.st : ""
+                data1.cm = it.cm ? it.cm : ""
+                data1.supplier = it.supplier ? it.supplier : ""
+                data1.sici = it.sici ? it.sici : ""
+                data1.sds = it.sds ? it.sds : ""
+                data1.jici = it.jici ? it.jici : ""
+                data1.ppmcNo = it.ppmcNo ? it.ppmcNo : ""
+                data1.colourName = it.colourName ? it.colourName : ""
+                data1.scjp = it.scjp ? it.scjp : ""
+                data1.pden = it.pden ? it.pden : ""
+                data1.cd = it.cd ? it.cd : ""
+                data1.ccam = it.ccam ? it.ccam : ""
+                data1.ccab = it.ccab ? it.ccab : ""
+                data1.dsiic = it.dsiic ? it.dsiic : ""
 
 
                 if (levelOld == levelNew
@@ -797,10 +783,10 @@ class AppController {
                         && oemPartNo == oemPartNoNew
                         && checkParent(parent, it1['_PARENT'])) {
 
-                    findFlag = excelData.indexOf(it1)
-                    data = it1
+
+                    //data = it1
                     foundFlag = true
-                    excelData.removeAt(findFlag)
+
                     return true
                 }
             }
@@ -822,45 +808,16 @@ class AppController {
                 data.ccam = (data.ccam==null||data.ccam=="")?data1.ccam:data.ccam
                 data.ccab = (data.ccab==null||data.ccab=="")?data1.ccab:data.ccab
                 data.dsiic = (data.dsiic==null||data.dsiic=="")?data1.dsiic:data.dsiic
-            }
-
-
-            if (deleteFlag == "yes") {
-                if (foundFlag==true) {
-
-                    compareData.add(data)
-                } else {
-
-                }
-
+                compareData.add(data)
             } else {
-                //println "foundFlag:"+index+" "+foundFlag+" "+excelData.size()
-                if (foundFlag==true) {
-                   // println "found index:"+index
-
-                    compareData.add(data)
-                } else {
-                    //println data1
-                    //compareData.add(data1)
-
-                }
+                compareData.add(data)
             }
 
+
+
         }
 
 
-        println "begin firstcompare"
-
-        println compareData.size()
-
-        println "end firstcompare"
-
-        println "excel after compare:"+excelData.size()
-        excelData.eachWithIndex { it, i ->
-
-            compareData.add(it)
-        }
-        println "final compareData:"+compareData.size()
 
         return compareData
     }

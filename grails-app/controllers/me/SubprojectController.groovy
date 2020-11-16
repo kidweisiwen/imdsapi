@@ -119,13 +119,14 @@ class SubprojectController {
         """ + whereSql.toString(), p)
 
         def rows = SubProject.findAll("""
-            select new map(a.id as id,a.name as name,a.no as no,a.description as description,
+            select new map(a.createUserId as createUserId,a.id as id,a.name as name,a.no as no,a.description as description,
             a.ver as ver,a.customer as customer,a.remark as remark,a.projectId as projectId)
             from SubProject a
         """ + whereSql + orderSql.toString(), p, [max: size, offset: (page - 1) * size])
 
         def data =[]
         rows.each{
+
             def hm = [:]
             hm.putAll(it)
             hm.adminFlag = allAdminFlag || (userId==it.createUserId) || (userSubProjectPermission[it.id]?userSubProjectPermission[it.id]:false)
