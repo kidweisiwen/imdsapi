@@ -1187,6 +1187,7 @@ class AppController {
 
                     if (key.indexOf(":" + oemPartNoFlag) != -1) {
                         rowData.oemPartNo = (value + "").trim()
+
                     }
                     if (key.indexOf(":" + infoFlag) != -1) {
                         rowData.info.add(value)

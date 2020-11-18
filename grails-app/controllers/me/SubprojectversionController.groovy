@@ -628,7 +628,13 @@ class SubprojectversionController {
                 jcPartNo = jcPartNo as float
             }
 
-            def oemPartNo = it.oemPartNo
+            def oemPartNo = it.oemPartNo?it.oemPartNo:""
+            if (oemPartNo=="null"||oemPartNo==null){
+                oemPartNo = ""
+            }
+
+
+
             def partDesc = it.partDesc
             //partDesc = partDesc.replaceAll("\n", " \\\\n ")
             partDesc = partDesc.replaceAll("\n", " \\\\n ")
@@ -713,7 +719,12 @@ class SubprojectversionController {
                     newJcPartNo = newJcPartNo as float
                 }
 
-                newOemPartNo = it1.oemPartNo
+                newOemPartNo = it1.oemPartNo?it1.oemPartNo:""
+                if (newOemPartNo=="null"||newOemPartNo==null){
+                    newOemPartNo = ""
+                }
+
+
                 newPartDesc = it1.partDesc
                 newPartDesc = newPartDesc.replaceAll("\n", " \\\\n ")
 
@@ -751,93 +762,60 @@ class SubprojectversionController {
             def content = []
 
 
-            if (deleteFlag == "yes") {
-                if (findFlag != null) {
+            if (findFlag != null) {
 
-                    content.add("\"info\":[" + newinfo + "]")
-                    content.add("\"levels\":[" + newlevels + "]")
-                    content.add("\"level\":\"" + newlevel + "\"")
+                content.add("\"info\":[" + newinfo + "]")
+                content.add("\"levels\":[" + newlevels + "]")
+                content.add("\"level\":\"" + newlevel + "\"")
 
-                    content.add("\"oemPartNo\":\"" + newOemPartNo + "\"")
-                    content.add("\"jcPartNo\":\"" + newJcPartNo + "\"")
-                    content.add("\"partDesc\":\"" + newPartDesc + "\"")
+                content.add("\"oemPartNo\":\"" + newOemPartNo + "\"")
+                content.add("\"jcPartNo\":\"" + newJcPartNo + "\"")
+                content.add("\"partDesc\":\"" + newPartDesc + "\"")
 
-                    content.add("\"wig\":\"" + newwig + "\"")
-                    content.add("\"st\":\"" + newst + "\"")
-                    content.add("\"cm\":\"" + newcm + "\"")
-                    content.add("\"supplier\":\"" + newsupplier + "\"")
-                    content.add("\"sici\":\"" + newsici + "\"")
-                    content.add("\"sds\":\"" + newsds + "\"")
-                    content.add("\"jici\":\"" + newjici + "\"")
-                    content.add("\"ppmcNo\":\"" + newppmcNo + "\"")
-                    content.add("\"colourName\":\"" + newcolourName + "\"")
-                    content.add("\"scjp\":\"" + newscjp + "\"")
-                    content.add("\"pden\":\"" + newpden + "\"")
-                    content.add("\"cd\":\"" + newcd + "\"")
-                    content.add("\"ccam\":\"" + newccam + "\"")
-                    content.add("\"ccab\":\"" + newccab + "\"")
-                    content.add("\"dsiic\":\"" + newdsiic + "\"")
-                    content.add("\"_PARENT\":" + newParent + "")
+                content.add("\"wig\":\"" + newwig + "\"")
+                content.add("\"st\":\"" + newst + "\"")
+                content.add("\"cm\":\"" + newcm + "\"")
+                content.add("\"supplier\":\"" + newsupplier + "\"")
+                content.add("\"sici\":\"" + newsici + "\"")
+                content.add("\"sds\":\"" + newsds + "\"")
+                content.add("\"jici\":\"" + newjici + "\"")
+                content.add("\"ppmcNo\":\"" + newppmcNo + "\"")
+                content.add("\"colourName\":\"" + newcolourName + "\"")
+                content.add("\"scjp\":\"" + newscjp + "\"")
+                content.add("\"pden\":\"" + newpden + "\"")
+                content.add("\"cd\":\"" + newcd + "\"")
+                content.add("\"ccam\":\"" + newccam + "\"")
+                content.add("\"ccab\":\"" + newccab + "\"")
+                content.add("\"dsiic\":\"" + newdsiic + "\"")
+                content.add("\"_PARENT\":" + newParent + "")
 
-                } else {
-
-                }
             } else {
-                if (findFlag != null) {
+                content.add("\"info\":[" + info + "]")
+                content.add("\"levels\":[" + levels + "]")
+                content.add("\"level\":\"" + level + "\"")
 
-                    content.add("\"info\":[" + newinfo + "]")
-                    content.add("\"levels\":[" + newlevels + "]")
-                    content.add("\"level\":\"" + newlevel + "\"")
+                content.add("\"oemPartNo\":\"" + oemPartNo + "\"")
+                content.add("\"jcPartNo\":\"" + jcPartNo + "\"")
+                content.add("\"partDesc\":\"" + partDesc + "\"")
 
-                    content.add("\"oemPartNo\":\"" + newOemPartNo + "\"")
-                    content.add("\"jcPartNo\":\"" + newJcPartNo + "\"")
-                    content.add("\"partDesc\":\"" + newPartDesc + "\"")
+                content.add("\"wig\":\"" + wig + "\"")
+                content.add("\"st\":\"" + st + "\"")
+                content.add("\"cm\":\"" + cm + "\"")
+                content.add("\"supplier\":\"" + supplier + "\"")
+                content.add("\"sici\":\"" + sici + "\"")
+                content.add("\"sds\":\"" + sds + "\"")
+                content.add("\"jici\":\"" + jici + "\"")
+                content.add("\"ppmcNo\":\"" + ppmcNo + "\"")
+                content.add("\"colourName\":\"" + colourName + "\"")
+                content.add("\"scjp\":\"" + scjp + "\"")
+                content.add("\"pden\":\"" + pden + "\"")
+                content.add("\"cd\":\"" + cd + "\"")
+                content.add("\"ccam\":\"" + ccam + "\"")
+                content.add("\"ccab\":\"" + ccab + "\"")
+                content.add("\"dsiic\":\"" + dsiic + "\"")
 
-                    content.add("\"wig\":\"" + newwig + "\"")
-                    content.add("\"st\":\"" + newst + "\"")
-                    content.add("\"cm\":\"" + newcm + "\"")
-                    content.add("\"supplier\":\"" + newsupplier + "\"")
-                    content.add("\"sici\":\"" + newsici + "\"")
-                    content.add("\"sds\":\"" + newsds + "\"")
-                    content.add("\"jici\":\"" + newjici + "\"")
-                    content.add("\"ppmcNo\":\"" + newppmcNo + "\"")
-                    content.add("\"colourName\":\"" + newcolourName + "\"")
-                    content.add("\"scjp\":\"" + newscjp + "\"")
-                    content.add("\"pden\":\"" + newpden + "\"")
-                    content.add("\"cd\":\"" + newcd + "\"")
-                    content.add("\"ccam\":\"" + newccam + "\"")
-                    content.add("\"ccab\":\"" + newccab + "\"")
-                    content.add("\"dsiic\":\"" + newdsiic + "\"")
-                    content.add("\"_PARENT\":" + newParent + "")
+                content.add("\"_PARENT\":" + parent + "")
 
-                } else {
-                    content.add("\"info\":[" + info + "]")
-                    content.add("\"levels\":[" + levels + "]")
-                    content.add("\"level\":\"" + level + "\"")
-
-                    content.add("\"oemPartNo\":\"" + oemPartNo + "\"")
-                    content.add("\"jcPartNo\":\"" + jcPartNo + "\"")
-                    content.add("\"partDesc\":\"" + partDesc + "\"")
-
-                    content.add("\"wig\":\"" + wig + "\"")
-                    content.add("\"st\":\"" + st + "\"")
-                    content.add("\"cm\":\"" + cm + "\"")
-                    content.add("\"supplier\":\"" + supplier + "\"")
-                    content.add("\"sici\":\"" + sici + "\"")
-                    content.add("\"sds\":\"" + sds + "\"")
-                    content.add("\"jici\":\"" + jici + "\"")
-                    content.add("\"ppmcNo\":\"" + ppmcNo + "\"")
-                    content.add("\"colourName\":\"" + colourName + "\"")
-                    content.add("\"scjp\":\"" + scjp + "\"")
-                    content.add("\"pden\":\"" + pden + "\"")
-                    content.add("\"cd\":\"" + cd + "\"")
-                    content.add("\"ccam\":\"" + ccam + "\"")
-                    content.add("\"ccab\":\"" + ccab + "\"")
-                    content.add("\"dsiic\":\"" + dsiic + "\"")
-
-                    content.add("\"_PARENT\":" + parent + "")
-
-                }
             }
             //println content.size()+" "+findFlag
             if (content.size() != 0) {
@@ -856,16 +834,32 @@ class SubprojectversionController {
             }
         }
 
-        println newData.size()
+        println "newData after size:"+newData.size()
         newData.eachWithIndex { it, i ->
 
+
+            def levels = it.levels
+            def oemPartNo = it.oemPartNo?it.oemPartNo:""
+            if (oemPartNo=="null"||oemPartNo==null){
+                oemPartNo = ""
+            }
+            levels = jsonSlurper.parseText(levels)
+            def levelsList = []
+            levels.each { nl ->
+                def key = nl.keySet()[0]
+                levelsList.add("{\"" + key + "\":\"" + nl[key] + "\"}")
+            }
+            levels = levelsList.join(",")
+
+            dataCount++
             def partDesc = it.partDesc ? it.partDesc : ""
             partDesc = partDesc.replaceAll("\n", " \\\\n ")
             def content = []
             content.add("\"info\":[" + it.info + "]")
-            content.add("\"levels\":[" + it.levels + "]")
+            content.add("\"levels\":[" + levels + "]")
             content.add("\"level\":\"" + it.level + "\"")
-            content.add("\"oemPartNo\":\"" + it.oemPartNo + "\"")
+
+            content.add("\"oemPartNo\":\"" + oemPartNo + "\"")
             content.add("\"jcPartNo\":\"" + it.jcPartNo + "\"")
 
             content.add("\"partDesc\":\"" + partDesc + "\"")
@@ -912,7 +906,7 @@ class SubprojectversionController {
                         values(${seq[0].id},${seq[0].id},${subProjectId},'${content}')
                     """.toString()
 
-            // println insertSql
+            //println insertSql
             sql.execute(insertSql)
         }
 
