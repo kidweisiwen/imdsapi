@@ -710,7 +710,7 @@ class AppController {
         println "newData=" + excelData.size()
 
         def jsonSlurper = new JsonSlurper()
-        println excelData
+        //println excelData
         excelData.eachWithIndex { it1, index ->
             def findFlag = null
             def foundFlag = false
@@ -731,7 +731,7 @@ class AppController {
             def data1 = [:]
             oldData.find { it ->
 
-
+                println it
                 def parent = jsonSlurper.parseText(it.parent)
 
 
@@ -901,7 +901,8 @@ class AppController {
                 //}
             }
         }
-
+        println "levelCell"
+        println levelCell
         //查找part desc标志单元格
         cells = getFlag(workbook, partDescFlag)
         if (cells.size() > 0) {
@@ -973,7 +974,7 @@ class AppController {
         def endIndex = rowCount - 1
         while(flag && endIndex>=0){
             def row = sheet.getRow(endIndex)
-            println endIndex
+            //println endIndex
             if (row!=null) {
                 //println row.getCell(jcPartNoCell)
                 if (row.getCell(jcPartNoCell).toString()!="") {
@@ -998,33 +999,33 @@ class AppController {
         //println cells[1].getCol()
 
         def headKey = [:]
-        (0..(totalHeadCols - 1)).each {
-            def headCell = headRow.getCell(it)
-            def key
-
-            if (sheet.isColumnHidden(it))
-                return
-
-            if (headCell == null) {
-                key = it + ""
-            } else {
-                if (headCell.cellType == CellType.STRING) {
-                    key = headCell.richStringCellValue
-                }
-                if (headCell.cellType == CellType.NUMERIC) {
-                    key = headCell.numericCellValue
-                }
-                if (headCell.cellType == CellType.BLANK) {
-                    key = "null"
-                }
-            }
-            headKey[it] = key
-        }
+//        (0..(totalHeadCols - 1)).each {
+//            def headCell = headRow.getCell(it)
+//            def key
+//
+//            if (sheet.isColumnHidden(it))
+//                return
+//
+//            if (headCell == null) {
+//                key = it + ""
+//            } else {
+//                if (headCell.cellType == CellType.STRING) {
+//                    key = headCell.richStringCellValue
+//                }
+//                if (headCell.cellType == CellType.NUMERIC) {
+//                    key = headCell.numericCellValue
+//                }
+//                if (headCell.cellType == CellType.BLANK) {
+//                    key = "null"
+//                }
+//            }
+//            headKey[it] = key
+//        }
 
 
         def firstRow = sheet.getRow(headRowIndex)
         def levelSpan = 0
-        levelCell.keySet().each{
+        levelCell.keySet().eachWithIndex{it,i->
             def tcell = firstRow.getCell(it)
             def tvalue = ""
             if (tcell.cellType == CellType.STRING) {
@@ -1043,26 +1044,28 @@ class AppController {
                 tvalue = ""
             }
             if (tvalue!=""){
-                levelSpan = (tvalue as int)-levelCell[it]
+                println (tvalue as int)
+                println levelCell[it]
+                levelSpan = (tvalue as int)-i
             }
         }
+        println "层级span："+levelSpan
+        //println "列头信息："+headKey
 
-        println "列头信息："+headKey
+
 
         if (levelSpan==0) {
             levelCell.keySet().eachWithIndex{it,index->
-                if (headKey[it]) {
-                    //headKey[it] = headKey[it] as float
-                }
+                headKey[it] = index
             }
         } else {
             levelCell.keySet().eachWithIndex{it,index->
-                headKey[it] =  headKey[it]-1
+                headKey[it] =  index+1
             }
         }
+        println "列头信息："+headKey
 
 
-        println "层级span："+levelSpan
 
 
         (headRowIndex..(rowCount - 1)).each { it ->
@@ -1289,14 +1292,15 @@ class AppController {
                 //println rowData._PARENT
                 //println rowData.jcPartNo
 
+                //println rowData
 
                 excelData.add(rowData)
                 //sql.execute(insert)
             } else {
-                println 11111
-                println rowData
 
-                println 2222
+                //println rowData
+
+
             }
 
 

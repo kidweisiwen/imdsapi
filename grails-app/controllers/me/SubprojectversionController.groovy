@@ -499,6 +499,12 @@ class SubprojectversionController {
         }
         content.add("\"info\":[" + infoArray.join(",") + "]")
 
+        def parent = []
+        oldContent._PARENT.each{
+             def array = []
+             
+        }
+        content.add("\"_PARENT\":[" + infoArray.join(",") + "]")
 
         content = "{" + content.join(",") + "}"
         def insertSql = """
@@ -965,7 +971,7 @@ class SubprojectversionController {
         def jsonSlurper = new JsonSlurper()
 
         def rows = []
-        fromData.eachWithIndex { it, i ->
+        toData.eachWithIndex { it, i ->
             def row = it
 
             def findFlag = null
@@ -1011,7 +1017,7 @@ class SubprojectversionController {
             row.parentJpn = it.parentJpn
             row.parentLevel = it.parentLevel
 
-            toData.find { it1 ->
+            fromData.find { it1 ->
                 def newParent = it1.parent ? it1.parent : ""
                 newParent = jsonSlurper.parseText(newParent)
 
@@ -1033,7 +1039,7 @@ class SubprojectversionController {
                         && oemPartNo == newOemPartNo
                         && checkParent(parent, newParent)
                 ) {
-                    findFlag = toData.indexOf(it1)
+                    findFlag = fromData.indexOf(it1)
 
                     row.newlevel = newlevel
                     row.newOemPartNo = newOemPartNo
@@ -1062,7 +1068,7 @@ class SubprojectversionController {
                     row.newparentLevel = it1.parentJpn
 
 
-                    toData.removeAt(findFlag)
+                    fromData.removeAt(findFlag)
                     return true
                 }
 
@@ -1106,21 +1112,21 @@ class SubprojectversionController {
 
 
             } else {
-                row.levelStyle = "text-decoration:line-through;color:red"
-                row.infoStyle = "text-decoration:line-through;color:red"
-                row.oempartnoStyle = "text-decoration:line-through;color:red"
-                row.jcpartnoStyle = "text-decoration:line-through;color:red"
-                row.partdescStyle = "text-decoration:line-through;color:red"
+                row.levelStyle = "color:red"
+                row.infoStyle = "color:red"
+                row.oempartnoStyle = "color:red"
+                row.jcpartnoStyle = "color:red"
+                row.partdescStyle = "color:red"
             }
 
 
-            row.jcpartnoStyle = jcpartnoStyle.join(";")
+            //row.jcpartnoStyle = jcpartnoStyle.join(";")
             row.style = style
 
             rows.add(row)
         }
 
-        toData.eachWithIndex { it, i ->
+        fromData.eachWithIndex { it, i ->
             def row = it
 
             def findFlag = -1
@@ -1140,9 +1146,9 @@ class SubprojectversionController {
             partDesc = partDesc.replaceAll("\n", " \\\\n ")
 
             row.level = level
-            row.jcpartno = jcPartNo
+            row.newJcPartNo = jcPartNo
             row.oempartno = oemPartNo
-            row.partdesc = partDesc
+            row.newPartDesc = partDesc
             row.id = it.id
             row.levels = it.levels
             row.info = it.info
@@ -1164,11 +1170,13 @@ class SubprojectversionController {
             row.parentJpn = it.parentJpn
             row.parentLevel = it.parentLevel
             row.findFlag = findFlag
-            row.style = "color:red"
-            row.levelStyle = "color:red"
-            row.oempartnoStyle = "color:red"
-            row.partdescStyle = "color:red"
-            row.infoStyle = "color:red"
+            row.style = "color:red;text-decoration:line-through;"
+            row.levelStyle = "color:red;text-decoration:line-through;"
+            row.oempartnoStyle = "color:red;text-decoration:line-through;"
+            row.partdescStyle = "color:red;text-decoration:line-through;"
+            row.jcpartnoStyle = "color:red;text-decoration:line-through;"
+            row.infoStyle = "color:red;text-decoration:line-through;"
+            println row
             rows.add(row)
         }
 
