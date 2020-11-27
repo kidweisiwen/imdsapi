@@ -464,8 +464,8 @@ class SubprojectversionController {
             }
         }
 
-        partDesc = partDesc.replace("\\", " \\\\")
-        partDesc = partDesc.replaceAll("\n", " \\\\n ")
+        partDesc = partDesc.replaceAll("\\", " \\\\")
+        partDesc = partDesc.replaceAll("\n", " \\\\n")
 
         //常规字段
         content.add("\"levels\":[" + levels.join(",") + "]")
@@ -501,10 +501,10 @@ class SubprojectversionController {
 
         def parent = []
         oldContent._PARENT.each{
-             def array = []
+            parent.add("[\"" + it[0] + "\",\""+ it[1] +"\",\"" + it[2] + "\"]")
              
         }
-        content.add("\"_PARENT\":[" + infoArray.join(",") + "]")
+        content.add("\"_PARENT\":[" + parent.join(",") + "]")
 
         content = "{" + content.join(",") + "}"
         def insertSql = """
@@ -512,7 +512,7 @@ class SubprojectversionController {
         where id=${id}
         """.toString()
 
-        //println insertSql
+        println insertSql
         sql.execute(insertSql)
 
 
@@ -643,7 +643,7 @@ class SubprojectversionController {
 
             def partDesc = it.partDesc
             //partDesc = partDesc.replaceAll("\n", " \\\\n ")
-            partDesc = partDesc.replaceAll("\n", " \\\\n ")
+            partDesc = partDesc.replaceAll("\n", " \\\\n")
             def wig = it.wig ? it.wig : ""
             def st = it.st ? it.st : ""
             def cm = it.cm ? it.cm : ""
@@ -732,7 +732,7 @@ class SubprojectversionController {
 
 
                 newPartDesc = it1.partDesc
-                newPartDesc = newPartDesc.replaceAll("\n", " \\\\n ")
+                newPartDesc = newPartDesc.replaceAll("\n", " \\\\n")
 
                 newwig = it1.wig ? it1.wig : ""
                 newst = it1.st ? it1.st : ""
@@ -859,7 +859,7 @@ class SubprojectversionController {
 
             dataCount++
             def partDesc = it.partDesc ? it.partDesc : ""
-            partDesc = partDesc.replaceAll("\n", " \\\\n ")
+            partDesc = partDesc.replaceAll("\n", " \\\\n")
             def content = []
             content.add("\"info\":[" + it.info + "]")
             content.add("\"levels\":[" + levels + "]")
@@ -990,7 +990,7 @@ class SubprojectversionController {
 
             def oemPartNo = it.oemPartNo
             def partDesc = it.partDesc
-            partDesc = partDesc.replaceAll("\n", " \\\\n ")
+            partDesc = partDesc.replaceAll("\n", " \\\\n")
 
             row.level = level
             row.jcpartno = jcPartNo
@@ -1033,7 +1033,7 @@ class SubprojectversionController {
 
                 def newOemPartNo = it1.oemPartNo
                 def newPartDesc = it1.partDesc
-                newPartDesc = newPartDesc.replaceAll("\n", " \\\\n ")
+                newPartDesc = newPartDesc.replaceAll("\n", " \\\\n")
                 if (level == newlevel
                         && jcPartNo == newJcPartNo
                         && oemPartNo == newOemPartNo
@@ -1143,7 +1143,7 @@ class SubprojectversionController {
 
             def oemPartNo = it.oemPartNo
             def partDesc = it.partDesc
-            partDesc = partDesc.replaceAll("\n", " \\\\n ")
+            partDesc = partDesc.replaceAll("\n", " \\\\n")
 
             row.level = level
             row.newJcPartNo = jcPartNo

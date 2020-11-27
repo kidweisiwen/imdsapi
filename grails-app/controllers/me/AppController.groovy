@@ -1428,7 +1428,7 @@ class AppController {
             }
 
             content = "{" + content.join(",") + "}"
-            content = content.replaceAll("\n", " \\\\n ")
+            content = content.replaceAll("\n", " \\\\n")
 
             //content = content.replace("\\H", " sss ")
 
