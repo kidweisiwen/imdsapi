@@ -72,6 +72,7 @@ class ProjectController {
                 def head = []
                 def levels = jsonSlurper.parseText(versionData[0].levels)
                 def info = jsonSlurper.parseText(versionData[0].info)
+
                 levels.each {
                     def key = it.keySet()[0]
                     head.add([value: Math.ceil(key as float), width: 10])

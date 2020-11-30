@@ -1088,7 +1088,7 @@ class AppController {
             def properties = []
             def rowData = [info: [], levels: []]
             def rowLevelIndex = -1
-
+            def levelNotEmptyCount = 0;
             (0..(totalCols - 1)).each { it1 ->
 
                 def cell = row.getCell(it1)
@@ -1197,6 +1197,13 @@ class AppController {
                     }
                     if (key.indexOf(":" + levelFlag) != -1 && headKey[it1] != null) {
                         rowData.levels.add("{\"" + headKey[it1] + "\":\"" + (value != null ? value : "") + "\"}")
+
+                        if (value!=null&&value!=""){
+                            levelNotEmptyCount++
+                        }
+
+
+
                     }
 
                     if (key.indexOf(":" + extensionFlag) != -1) {
@@ -1224,6 +1231,11 @@ class AppController {
             //println rowData.jcPartNo
             if (rowData.jcPartNo=="") {
                 message.add("第"+(it+1)+"行 JC Part No为空")
+                //return [code: -1, data: message]
+            }
+            println "levelNotEmptyCount:"+levelNotEmptyCount
+            if (levelNotEmptyCount>1) {
+                message.add("第"+(it+1)+"行 层级重复")
                 //return [code: -1, data: message]
             }
 
