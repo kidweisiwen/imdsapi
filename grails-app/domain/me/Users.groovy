@@ -7,6 +7,7 @@ class Users {
     String email
     String tel
     String role
+
     static constraints = {
         cnName nullable: true
         enName nullable: true

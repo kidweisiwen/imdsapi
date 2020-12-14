@@ -13,6 +13,11 @@ import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+import javax.naming.Context
+import javax.naming.directory.SearchControls
+import javax.naming.directory.SearchResult
+import javax.naming.ldap.InitialLdapContext
+import javax.naming.ldap.LdapContext
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,6 +52,59 @@ class AppController {
     def dataSource
     def dataVersionService
 
+    def ldapLogin = {username,password->
+        try{
+            println "LoginController–submitLdap–69–> " + username
+            System.setProperty("javax.net.ssl.trustStore", "C:\\Program Files\\Java\\jdk1.8.0_131\\jre\\lib\\security\\cacerts");
+            System.setProperty("javax.net.ssl.keyStorePassword", "changeit");
+            Hashtable env = new Hashtable();
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            //env.put(Context.SECURITY_PRINCIPAL, username+"@yanfeng.com");
+            // env.put(Context.SECURITY_CREDENTIALS, params.password);
+            env.put(Context.SECURITY_PRINCIPAL, "a300222");
+            env.put(Context.SECURITY_CREDENTIALS, 'UUyBStf"4L&naSUEdzLf');
+            // env.put(Context.SECURITY_PRINCIPAL, "zhou.fu@yanfeng.com");
+            //env.put(Context.SECURITY_CREDENTIALS, 'Tonypidai6_');
+            env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+            //env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM");
+            env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/DC=YFCO,DC=YANFENGCO,DC=COM");//2020-04-26 付周要求更改
+
+            env.put(Context.SECURITY_PROTOCOL, "ssl");
+            LdapContext ctx = new InitialLdapContext(env, null);
+
+            SearchControls searchCtls = new SearchControls();
+            searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            searchCtls.setReturningAttributes("userPrincipalName");
+            //String searchBase = "OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM";
+            String searchBase = "DC=YFCO,DC=YANFENGCO,DC=COM"; //2020-04-26 付周要求更改
+
+            def answer = ctx.search("", "(sAMAccountName="+username+")",searchCtls);
+            String userPrincipalName;
+            while (answer.hasMoreElements()) {
+                def sr = (SearchResult) answer.next();
+                userPrincipalName = sr.getAttributes().getAll().next().getAll().nextElement();
+                println(userPrincipalName)
+            }
+
+            env = new Hashtable();
+            env.put(Context.SECURITY_AUTHENTICATION, "simple");
+            env.put(Context.SECURITY_PRINCIPAL, userPrincipalName);
+            env.put(Context.SECURITY_CREDENTIALS, password);
+            env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+            //env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM");
+            env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/DC=YFCO,DC=YANFENGCO,DC=COM");//2020-04-26 付周要求更改
+            env.put(Context.SECURITY_PROTOCOL, "ssl");
+            ctx = new InitialLdapContext(env, null);
+            ctx.close();
+
+            return true
+        } catch (e){
+            println e
+            return false
+        }
+    }
+
+    @Transactional
     def login() {
         def results = [:]
         println request.JSON
@@ -60,30 +118,66 @@ class AppController {
 
         def user = Users.findByUserLoginId(userLoginId)
         if (user == null) {
-            if (userLoginId == "jjttkid" && password == "JjTt090723") {
+            if (userLoginId == "admin" && password == "12345678") {
                 results = [
                         code: 0,
                         msg : '登录成功',
                         data: [
-                                userLoginId: "jjttkid",
+                                userLoginId: "admin",
                                 userId     : 0,
-                                userName   : "jjttkid",
-                                password   : 'JjTt090723',
-                                uuid       : "jjttkid",
+                                userName   : "admin",
+                                password   : '12345678',
+                                uuid       : "admin",
                                 info       : [
-                                        name       : "jjttkid",
-                                        userLoginId: "jjttkid",
+                                        name       : "系统管理员",
+                                        userLoginId: "admin",
                                         userId     : 0,
-                                        userName   : 'jjttkid',
-                                        avatar     : 'http://localhost:8080/static/avatar/default.gif',
+                                        userName   : 'admin',
+                                        avatar     : 'http://10.109.205.177:8080/static/avatar/default.gif',
                                         access     : ['USER', 'ADMIN']
                                 ],
                                 token      : UUID.randomUUID().toString().replace('-', '')
                         ]
                 ]
             } else {
-                results.code = -1
-                results.msg = "用户名或密码错误，请重新输入"
+                if (ldapLogin(userLoginId,password)) {
+                    user = new Users(cnName: userLoginId, userLoginId: userLoginId,role: "USER")
+                    user.save(flush: true)
+
+                    if (user==null) {
+                        results.code = -1
+                        results.msg = "用户不存在"
+                    } else {
+                        def roles = user.role == "USER" ? ["USER"] : ["USER", "ADMIN"]
+
+                        results = [
+                                code: 0,
+                                msg : '登录成功',
+                                data: [
+                                        userLoginId: userLoginId,
+                                        userId     : user.id,
+                                        userName   : user.cnName,
+                                        password   : 'aaa',
+                                        uuid       : userLoginId,
+                                        info       : [
+                                                name       : user.cnName,
+                                                userLoginId: userLoginId,
+                                                userId     : user.id,
+                                                userName   : user.cnName,
+                                                avatar     : 'http://10.109.205.177:8080/static/avatar/default.gif',
+                                                access     : roles
+                                        ],
+                                        token      : UUID.randomUUID().toString().replace('-', '')
+                                ]
+                        ]
+                    }
+
+                } else {
+
+                    results.code = -1
+                    results.msg = "用户名或密码错误，请重新输入"
+
+                }
             }
         } else {
             def roles = user.role == "USER" ? ["USER"] : ["USER", "ADMIN"]
@@ -98,11 +192,11 @@ class AppController {
                             password   : 'aaa',
                             uuid       : userLoginId,
                             info       : [
-                                    name       : userLoginId,
+                                    name       : user.cnName,
                                     userLoginId: userLoginId,
                                     userId     : user.id,
                                     userName   : user.cnName,
-                                    avatar     : 'http://localhost:8080/static/avatar/default.gif',
+                                    avatar     : 'http://10.109.205.177:8080/static/avatar/default.gif',
                                     access     : roles
                             ],
                             token      : UUID.randomUUID().toString().replace('-', '')
@@ -1236,6 +1330,7 @@ class AppController {
             println "levelNotEmptyCount:"+levelNotEmptyCount
             if (levelNotEmptyCount>1) {
                 message.add("第"+(it+1)+"行 层级重复")
+                insertFlag = false
                 //return [code: -1, data: message]
             }
 

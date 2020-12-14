@@ -23,6 +23,7 @@ class ProjectController {
     def exportexcel() {
 
 
+
         def subProjects = SubProject.findAllByProjectId(params.id)
         def jsonSlurper = new JsonSlurper()
         def levelCol = ["1", "2", "3", "4", "5", "6"]
@@ -50,9 +51,10 @@ class ProjectController {
         FileOutputStream fileOutputStream = null;
         //sleep 3000
         try {
-            String fileName = "工作文档.xlsx";
+            String fileName = "download.xlsx";
 
             fileName = URLEncoder.encode(fileName, "UTF-8");
+
             response.reset();
             response.addHeader("Access-Control-Allow-Origin", "*");
             response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
@@ -62,87 +64,96 @@ class ProjectController {
             outputStream = response.getOutputStream();
 
             def workbook = new XSSFWorkbook();
-
+            def template = new FileInputStream(new File("template/template.xlsx"));
+            println template
+            //def workBook = new XSSFWorkbook(new BufferedInputStream(template));
             subProjects.each {
                 def sheetName = it.name
                 def sheetData = []
 
-                def versionData = dataVersionService.queryTable(it.ver, it.id)
-
-                def head = []
-                def levels = jsonSlurper.parseText(versionData[0].levels)
-                def info = jsonSlurper.parseText(versionData[0].info)
-
-                levels.each {
-                    def key = it.keySet()[0]
-                    head.add([value: Math.ceil(key as float), width: 10])
+                def versionData = []
+                try {
+                    versionData = dataVersionService.queryTable(it.ver, it.id)
+                } catch(e){
+                    //println e
                 }
 
-                mainCol.each {
-                    head.add([value: it, width: 20])
-                }
+                if (versionData.size()>0) {
 
-                infoCol = []
-                info.each {
-                    head.add([value: "", width: 20])
-                }
+                    def head = []
+                    def levels = jsonSlurper.parseText(versionData[0].levels)
+                    def info = jsonSlurper.parseText(versionData[0].info)
 
-                extensionCol.each {
-                    head.add([value: it, width: 20])
-                }
-
-                sheetData.add(head)
-                versionData.each {
-                    def row = []
-
-                    def jcPartNo = it.jcpartno
-                    def oemPartNo = it.oempartno
-                    def partDesc = it.partdesc
-
-                    jsonSlurper.parseText(it.levels).each { it1 ->
-                        def key = it1.keySet()[0]
-                        if (it1[key] != null && it1[key] != "") {
-                            row.add([value:Math.ceil(it1[key] as float),width:10])
-                        } else {
-                            row.add([value:"",width:10])
-                        }
-
-                    }
-                    row.add([value:partDesc,width:20])
-                    row.add([value:Math.ceil(jcPartNo as float),width:20])
-                    row.add([value:oemPartNo,width:20])
-
-                    jsonSlurper.parseText(it.info).each { it1 ->
-                        if (it1?.trim()) {
-                            row.add([value:Math.ceil(it1 as float),width:10])
-                        } else {
-                            row.add([value:"",width:10])
-                        }
+                    levels.each {
+                        def key = it.keySet()[0]
+                        head.add([value: Math.ceil(key as float), width: 10])
                     }
 
-                    row.add([value:it.wig,width:40])
-                    row.add([value:it.st,width:40])
-                    row.add([value:it.cm,width:40])
-                    row.add([value:it.supplier,width:40])
-                    row.add([value:it.sici,width:40])
-                    row.add([value:it.sds,width:40])
-                    row.add([value:it.jici,width:40])
-                    row.add([value:it.ppmcNo,width:40])
-                    row.add([value:it.colourName,width:40])
-                    row.add([value:it.scjp,width:40])
-                    row.add([value:it.pden,width:40])
-                    row.add([value:it.cd,width:40])
-                    row.add([value:it.ccam,width:40])
-                    row.add([value:it.ccab,width:40])
-                    row.add([value:it.wig,width:40])
+                    mainCol.each {
+                        head.add([value: it, width: 20])
+                    }
+
+                    infoCol = []
+                    info.each {
+                        head.add([value: "", width: 20])
+                    }
+
+                    extensionCol.each {
+                        head.add([value: it, width: 20])
+                    }
+
+                    sheetData.add(head)
+                    versionData.each {
+                        def row = []
+
+                        def jcPartNo = it.jcpartno
+                        def oemPartNo = it.oempartno
+                        def partDesc = it.partdesc
+
+                        jsonSlurper.parseText(it.levels).each { it1 ->
+                            def key = it1.keySet()[0]
+                            if (it1[key] != null && it1[key] != "") {
+                                row.add([value: Math.ceil(it1[key] as float), width: 10])
+                            } else {
+                                row.add([value: "", width: 10])
+                            }
+
+                        }
+                        row.add([value: partDesc, width: 20])
+                        row.add([value: Math.ceil(jcPartNo as float), width: 20])
+                        row.add([value: oemPartNo, width: 20])
+
+                        jsonSlurper.parseText(it.info).each { it1 ->
+                            if (it1?.trim()) {
+                                row.add([value: Math.ceil(it1 as float), width: 10])
+                            } else {
+                                row.add([value: "", width: 10])
+                            }
+                        }
+
+                        row.add([value: it.wig, width: 40])
+                        row.add([value: it.st, width: 40])
+                        row.add([value: it.cm, width: 40])
+                        row.add([value: it.supplier, width: 40])
+                        row.add([value: it.sici, width: 40])
+                        row.add([value: it.sds, width: 40])
+                        row.add([value: it.jici, width: 40])
+                        row.add([value: it.ppmcNo, width: 40])
+                        row.add([value: it.colourName, width: 40])
+                        row.add([value: it.scjp, width: 40])
+                        row.add([value: it.pden, width: 40])
+                        row.add([value: it.cd, width: 40])
+                        row.add([value: it.ccam, width: 40])
+                        row.add([value: it.ccab, width: 40])
+                        row.add([value: it.wig, width: 40])
 
 
+                        sheetData.add(row)
 
-                    sheetData.add(row)
+                    }
 
+                    subProjectVersionService.createSheet(workbook, sheetName, sheetData)
                 }
-
-                subProjectVersionService.createSheet(workbook, sheetName, sheetData)
             }
 
             workbook.write(outputStream);

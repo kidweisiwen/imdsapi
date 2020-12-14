@@ -990,7 +990,7 @@ class SubprojectversionController {
 
             def oemPartNo = it.oemPartNo
             def partDesc = it.partDesc
-            partDesc = partDesc.replaceAll("\n", " \\\\n")
+            //partDesc = partDesc.replaceAll("\n", " ")
 
             row.level = level
             row.jcpartno = jcPartNo
@@ -1033,7 +1033,7 @@ class SubprojectversionController {
 
                 def newOemPartNo = it1.oemPartNo
                 def newPartDesc = it1.partDesc
-                newPartDesc = newPartDesc.replaceAll("\n", " \\\\n")
+                //newPartDesc = newPartDesc.replaceAll("\n", " ")
                 if (level == newlevel
                         && jcPartNo == newJcPartNo
                         && oemPartNo == newOemPartNo
