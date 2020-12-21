@@ -1,14 +1,18 @@
 package me
 
+import java.awt.*
 import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
+import org.apache.poi.hssf.usermodel.HSSFCellStyle
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.openxml4j.util.ZipSecureFile
 import org.apache.poi.sl.usermodel.VerticalAlignment
+import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.BorderStyle
 import org.apache.poi.ss.usermodel.HorizontalAlignment
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFColor
 import org.apache.poi.xssf.usermodel.XSSFFont
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -52,8 +56,18 @@ class AppController {
     def dataSource
     def dataVersionService
 
-    def ldapLogin = {username,password->
-        try{
+    def isRowEmpty = { row ->
+        for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
+            def cell = row.getCell(c);
+            if (cell != null && cell.getCellType() != CellType.BLANK)
+                return false;
+        }
+        return true;
+    }
+
+
+    def ldapLogin = { username, password ->
+        try {
             println "LoginController–submitLdap–69–> " + username
             System.setProperty("javax.net.ssl.trustStore", "C:\\Program Files\\Java\\jdk1.8.0_131\\jre\\lib\\security\\cacerts");
             System.setProperty("javax.net.ssl.keyStorePassword", "changeit");
@@ -65,7 +79,7 @@ class AppController {
             env.put(Context.SECURITY_CREDENTIALS, 'UUyBStf"4L&naSUEdzLf');
             // env.put(Context.SECURITY_PRINCIPAL, "zhou.fu@yanfeng.com");
             //env.put(Context.SECURITY_CREDENTIALS, 'Tonypidai6_');
-            env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             //env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM");
             env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/DC=YFCO,DC=YANFENGCO,DC=COM");//2020-04-26 付周要求更改
 
@@ -78,7 +92,7 @@ class AppController {
             //String searchBase = "OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM";
             String searchBase = "DC=YFCO,DC=YANFENGCO,DC=COM"; //2020-04-26 付周要求更改
 
-            def answer = ctx.search("", "(sAMAccountName="+username+")",searchCtls);
+            def answer = ctx.search("", "(sAMAccountName=" + username + ")", searchCtls);
             String userPrincipalName;
             while (answer.hasMoreElements()) {
                 def sr = (SearchResult) answer.next();
@@ -90,7 +104,7 @@ class AppController {
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             env.put(Context.SECURITY_PRINCIPAL, userPrincipalName);
             env.put(Context.SECURITY_CREDENTIALS, password);
-            env.put(Context.INITIAL_CONTEXT_FACTORY,"com.sun.jndi.ldap.LdapCtxFactory");
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             //env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/OU=YFAS,DC=YFCO,DC=YANFENGCO,DC=COM");
             env.put(Context.PROVIDER_URL, "LDAPS://10.178.148.90:636/DC=YFCO,DC=YANFENGCO,DC=COM");//2020-04-26 付周要求更改
             env.put(Context.SECURITY_PROTOCOL, "ssl");
@@ -98,7 +112,7 @@ class AppController {
             ctx.close();
 
             return true
-        } catch (e){
+        } catch (e) {
             println e
             return false
         }
@@ -140,11 +154,11 @@ class AppController {
                         ]
                 ]
             } else {
-                if (ldapLogin(userLoginId,password)) {
-                    user = new Users(cnName: userLoginId, userLoginId: userLoginId,role: "USER")
+                if (ldapLogin(userLoginId, password)) {
+                    user = new Users(cnName: userLoginId, userLoginId: userLoginId, role: "USER")
                     user.save(flush: true)
 
-                    if (user==null) {
+                    if (user == null) {
                         results.code = -1
                         results.msg = "用户不存在"
                     } else {
@@ -412,10 +426,70 @@ class AppController {
 
     @Transactional(readOnly = true)
     def exportsubprojectversion() {
-
+        println 444566
         def jsonSlurper = new JsonSlurper()
         def levelCol = ["1", "2", "3", "4", "5", "6"]
-        def mainCol = ["part desc", "jc part no", "oem part no"]
+        def mainCol = ["part description", "YFAS Part No.","YFAS Part Rev.",
+            "OEM Part No."
+        ]
+        def mainCol1 = [
+                "OEM Part Rev."
+        ]
+        def mainCol2 = [
+                "Space for Level 1 parts"
+        ]
+        def mainCol3 = [
+                "COP","ＹFAS Drawing Number","ＹFAS Drawing Level","ＹFAS Drawing Desc",
+                "Originating Program","Status","ECO","Release Date","ECR","DA","DA Short Description"
+        ]
+        def mainCol4 = [
+                "Weight in g (for Adient sourced materials only)",
+                "Material (for Adient sourced materials only)"
+        ]
+        def mainCol5 = [
+                "Surface Treatment",
+                "Change Management"
+        ]
+        def mainCol6 = [
+                "Colour Key"
+        ]
+        def mainCol7 = [
+                "Colour Code"
+        ]
+        def mainCol8 = [
+                "D-Part",
+                "E-Part"
+        ]
+        def mainCol9 = [
+                "OEM Drawing Number",
+                "OEM Drawing Level",
+        ]
+        def mainCol10 = [
+                "Supplier"
+        ]
+        def mainCol11 = [
+                "Supplier Part Number",
+                "Supplier Part Level",
+                "Supplier Drawing Number",
+                "Supplier Drawing Level"
+        ]
+        def mainCol12 = [
+                "Supplier IMDS/CAMDS ID",
+                "Supplier datasheet status",
+                "YFAS IMDS/CAMDS ID",
+                "PPMC No.",
+                "colour (name)",
+                "supplier code  of JC plant (e.g. DUNS)",
+                "PPAP date / EMPB-Nr",
+                "Customer directed Part (Y/N)"
+        ]
+
+        def mainCol13 = [
+                "Comments / corrective action MDM",
+                "Comments / corrective action BU",
+                "datasheet status in IMDS/CAMDS\n(RYG)"
+        ]
+
         def infoCol = ["", "", "", "", ""]
         def extensionCol = [
                 "Weight in g",
@@ -455,19 +529,94 @@ class AppController {
 
             def workbook = new XSSFWorkbook();
 
+
+            def template = new FileInputStream(new File("template/newtemplate.xlsx"));
+            println template
+            workbook = new XSSFWorkbook(new BufferedInputStream(template));
+
             def headFont = workbook.createFont();
-            headFont.setFontHeightInPoints((short) 15);
-            //headFont.setFontName("黑体");
-            headFont.setBold(true);
+            headFont.setFontHeightInPoints((short) 10);
+            headFont.setFontName("Arial");
+            headFont.setBold(false);
+
+            def headFont1 = workbook.createFont();
+            headFont.setFontHeightInPoints((short) 10);
+            headFont.setFontName("微软雅黑");
+            headFont.setBold(false);
+
+
+            def color = new XSSFColor(new java.awt.Color(0, 255, 255));
+
+            def headCellStyle0 = workbook.createCellStyle();
+            headCellStyle0.setFont(headFont);
+            headCellStyle0.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle0.setVerticalAlignment(headCellStyle0.getVerticalAlignmentEnum().BOTTOM);
+            headCellStyle0.setWrapText(true);
+            headCellStyle0.setBorderTop(BorderStyle.THIN);
+            headCellStyle0.setBorderLeft(BorderStyle.THIN);
+            headCellStyle0.setBorderRight(BorderStyle.THIN);
+            headCellStyle0.setBorderBottom(BorderStyle.THIN);
+
+
             def headCellStyle = workbook.createCellStyle();
             headCellStyle.setFont(headFont);
-            headCellStyle.setAlignment(HorizontalAlignment.CENTER);
+            headCellStyle.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle.setVerticalAlignment(headCellStyle.getVerticalAlignmentEnum().BOTTOM);
             headCellStyle.setWrapText(true);
-            headCellStyle.setBorderTop(BorderStyle.DOUBLE);
-            headCellStyle.setBorderLeft(BorderStyle.DOUBLE);
-            headCellStyle.setBorderRight(BorderStyle.DOUBLE);
-            headCellStyle.setBorderBottom(BorderStyle.DOUBLE);
+            headCellStyle.setBorderTop(BorderStyle.THIN);
+            headCellStyle.setBorderLeft(BorderStyle.THIN);
+            headCellStyle.setBorderRight(BorderStyle.THIN);
+            headCellStyle.setBorderBottom(BorderStyle.THIN);
+            headCellStyle.setFillForegroundColor(new XSSFColor(new Color(0, 255, 255)))
+            headCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND)
 
+            def headCellStyle1 = workbook.createCellStyle();
+            headCellStyle1.setFont(headFont);
+            headCellStyle1.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle1.setVerticalAlignment(headCellStyle1.getVerticalAlignmentEnum().BOTTOM);
+            headCellStyle1.setWrapText(true);
+            headCellStyle1.setBorderTop(BorderStyle.THIN);
+            headCellStyle1.setBorderLeft(BorderStyle.THIN);
+            headCellStyle1.setBorderRight(BorderStyle.THIN);
+            headCellStyle1.setBorderBottom(BorderStyle.THIN);
+            headCellStyle1.setFillForegroundColor(new XSSFColor(new Color(255, 255, 0)))
+            headCellStyle1.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+            def headCellStyle2 = workbook.createCellStyle();
+            headCellStyle2.setFont(headFont);
+            headCellStyle2.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle2.setVerticalAlignment(headCellStyle2.getVerticalAlignmentEnum().BOTTOM);
+            headCellStyle2.setWrapText(true);
+            headCellStyle2.setBorderTop(BorderStyle.THIN);
+            headCellStyle2.setBorderLeft(BorderStyle.THIN);
+            headCellStyle2.setBorderRight(BorderStyle.THIN);
+            headCellStyle2.setBorderBottom(BorderStyle.THIN);
+            headCellStyle2.setFillForegroundColor(new XSSFColor(new Color(255, 204, 153)))
+            headCellStyle2.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+            def headCellStyle3 = workbook.createCellStyle();
+            headCellStyle3.setFont(headFont1);
+            headCellStyle3.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle3.setVerticalAlignment(headCellStyle3.getVerticalAlignmentEnum().BOTTOM);
+            headCellStyle3.setWrapText(true);
+            headCellStyle3.setBorderTop(BorderStyle.THIN);
+            headCellStyle3.setBorderLeft(BorderStyle.THIN);
+            headCellStyle3.setBorderRight(BorderStyle.THIN);
+            headCellStyle3.setBorderBottom(BorderStyle.THIN);
+            headCellStyle3.setFillForegroundColor(new XSSFColor(new Color(192, 192, 192)))
+            headCellStyle3.setFillPattern(FillPatternType.SOLID_FOREGROUND)
+
+            def headCellStyle4 = workbook.createCellStyle();
+            headCellStyle4.setFont(headFont);
+            headCellStyle4.setAlignment(HorizontalAlignment.LEFT);
+            headCellStyle4.setVerticalAlignment(headCellStyle4.getVerticalAlignmentEnum().BOTTOM);
+            headCellStyle4.setWrapText(true);
+            headCellStyle4.setBorderTop(BorderStyle.THIN);
+            headCellStyle4.setBorderLeft(BorderStyle.THIN);
+            headCellStyle4.setBorderRight(BorderStyle.THIN);
+            headCellStyle4.setBorderBottom(BorderStyle.THIN);
+            headCellStyle4.setFillForegroundColor(new XSSFColor(new Color(255, 0, 0)))
+            headCellStyle4.setFillPattern(FillPatternType.SOLID_FOREGROUND)
 
             def rowFont = workbook.createFont();
             def rowCellStyle = workbook.createCellStyle();
@@ -475,14 +624,17 @@ class AppController {
             rowCellStyle.setVerticalAlignment(rowCellStyle.getVerticalAlignmentEnum().CENTER);
             rowCellStyle.setFont(rowFont);
             rowCellStyle.setWrapText(true);
-            rowCellStyle.setBorderTop(BorderStyle.DOUBLE);
-            rowCellStyle.setBorderLeft(BorderStyle.DOUBLE);
-            rowCellStyle.setBorderRight(BorderStyle.DOUBLE);
-            rowCellStyle.setBorderBottom(BorderStyle.DOUBLE);
+            rowCellStyle.setBorderTop(BorderStyle.THIN);
+            rowCellStyle.setBorderLeft(BorderStyle.THIN);
+            rowCellStyle.setBorderRight(BorderStyle.THIN);
+            rowCellStyle.setBorderBottom(BorderStyle.THIN);
 
-            def sheet = workbook.createSheet(sheetName);
+            def sheet = workbook.getSheetAt(0)
+            //workbook.setSheetName(0,sheetName)
+            //def sheet = workbook.createSheet(sheetName);
 
             def head = sheet.createRow(0);
+            head.setHeight((short) 1520)
             def levels = jsonSlurper.parseText(versionData[0].levels)
             def info = jsonSlurper.parseText(versionData[0].info)
 
@@ -497,10 +649,24 @@ class AppController {
                 infoCol.add("")
             }
 
-            renderCol(sheet, headCellStyle, head, levelCol, 10)
-            renderCol(sheet, headCellStyle, head, mainCol, 20)
-            renderCol(sheet, headCellStyle, head, infoCol, 20)
-            renderCol(sheet, headCellStyle, head, extensionCol, 20)
+            renderCol(sheet, headCellStyle, head, ["Pos",""], 2)
+            renderCol(sheet, headCellStyle, head, levelCol, 2)
+            renderCol(sheet, headCellStyle, head, mainCol, 10)
+            renderCol(sheet, headCellStyle1, head, mainCol1, 10)
+            renderCol(sheet, headCellStyle2, head, mainCol2, 10)
+            renderCol(sheet, headCellStyle3, head, mainCol3, 10)
+            renderCol(sheet, headCellStyle, head, mainCol4, 10)
+            renderCol(sheet, headCellStyle4, head, mainCol5, 10)
+            renderCol(sheet, headCellStyle3, head, mainCol6, 10)
+            renderCol(sheet, headCellStyle, head, mainCol7, 10)
+            renderCol(sheet, headCellStyle3, head, mainCol8, 10)
+            renderCol(sheet, headCellStyle1, head, mainCol9, 10)
+            renderCol(sheet, headCellStyle, head, mainCol10, 10)
+            renderCol(sheet, headCellStyle3, head, mainCol11, 10)
+            renderCol(sheet, headCellStyle, head, mainCol12, 10)
+            renderCol(sheet, headCellStyle0, head, mainCol13, 10)
+            //renderCol(sheet, headCellStyle, head, infoCol, 20)
+            //renderCol(sheet, headCellStyle, head, extensionCol, 20)
 
 
             def index = 1
@@ -526,20 +692,37 @@ class AppController {
 
                 }
 
+                renderCol(sheet, headCellStyle, row, ['',''], 10)
 
-                renderCol(sheet, rowCellStyle, row, levelCol, 10)
+                renderCol(sheet, headCellStyle, row, levelCol, 10)
 
 
                 mainCol = []
                 mainCol.add(partDesc)
-                renderCol(sheet, rowCellStyle, row, mainCol, 80)
+                renderCol(sheet, headCellStyle, row, mainCol, 30)
 
                 mainCol = []
                 mainCol.add(jcPartNo.isFloat() ? Math.ceil(jcPartNo as float) : jcPartNo)
+                mainCol.add("")
                 mainCol.add(oemPartNo)
-                renderCol(sheet, rowCellStyle, row, mainCol, 15)
+                renderCol(sheet, headCellStyle, row, mainCol, 10)
 
 
+                renderCol(sheet, headCellStyle1, row, [""], 10)
+                renderCol(sheet, headCellStyle2, row, [""], 10)
+                renderCol(sheet, headCellStyle3, row, ["","","","","","","","","","",""], 10)
+
+                renderCol(sheet, headCellStyle, row, [it.wig,""], 12)
+                renderCol(sheet, headCellStyle4, row, [it.st,it.cm], 12)
+
+                renderCol(sheet, headCellStyle3, row, [""], 10)
+                renderCol(sheet, headCellStyle, row, [""], 10)
+                renderCol(sheet, headCellStyle3, row, ["",""], 10)
+                renderCol(sheet, headCellStyle1, row, ["",""], 10)
+                renderCol(sheet, headCellStyle, row, [it.supplier], 10)
+                renderCol(sheet, headCellStyle3, row, ["","","",""], 10)
+                renderCol(sheet, headCellStyle, row, [it.sici,it.sds,it.jici,it.ppmcNo,it.colourName,it.scjp,it.pden,it.cd], 10)
+                renderCol(sheet, headCellStyle0, row, [it.ccam,it.ccab,it.dsiic], 10)
                 infoCol = []
                 jsonSlurper.parseText(it.info).each { it1 ->
                     if (it1?.trim()) {
@@ -548,7 +731,7 @@ class AppController {
                         infoCol.add("")
                     }
                 }
-                renderCol(sheet, rowCellStyle, row, infoCol, 10)
+                //renderCol(sheet, rowCellStyle, row, infoCol, 10)
 
                 dataCol = [
                         it.wig,
@@ -565,9 +748,9 @@ class AppController {
                         it.cd,
                         it.ccam,
                         it.ccab,
-                        it.ccab
+                        it.dsiic
                 ]
-                renderCol(sheet, rowCellStyle, row, dataCol, 40)
+                //renderCol(sheet, rowCellStyle, row, dataCol, 40)
 
             }
 
@@ -840,8 +1023,6 @@ class AppController {
                 }
 
 
-
-
                 data1.jcPartNo = it.jcPartNo
                 data1.oemPartNo = it.oemPartNo
                 data1.partDesc = it.partDesc
@@ -886,31 +1067,29 @@ class AppController {
             }
 
 
-            if (foundFlag==true) {
-                data.wig = (data.wig==null||data.wig=="")?data1.wig:data.wig
-                data.st = (data.st==null||data.st=="")?data1.st:data.st
-                data.cm = (data.cm==null||data.cm=="")?data1.cm:data.cm
-                data.supplier = (data.supplier==null||data.supplier=="")?data1.supplier:data.supplier
-                data.sici = (data.sici==null||data.sici=="")?data1.sici:data.sici
-                data.sds = (data.sds==null||data.sds=="")?data1.sds:data.sds
-                data.jici = (data.jici==null||data.jici=="")?data1.jici:data.jici
-                data.ppmcNo = (data.ppmcNo==null||data.ppmcNo=="")?data1.ppmcNo:data.ppmcNo
-                data.colourName = (data.colourName==null||data.colourName=="")?data1.colourName:data.colourName
-                data.scjp = (data.scjp==null||data.scjp=="")?data1.scjp:data.scjp
-                data.pden = (data.pden==null||data.pden=="")?data1.pden:data.pden
-                data.cd = (data.cd==null||data.cd=="")?data1.cd:data.cd
-                data.ccam = (data.ccam==null||data.ccam=="")?data1.ccam:data.ccam
-                data.ccab = (data.ccab==null||data.ccab=="")?data1.ccab:data.ccab
-                data.dsiic = (data.dsiic==null||data.dsiic=="")?data1.dsiic:data.dsiic
+            if (foundFlag == true) {
+                data.wig = (data.wig == null || data.wig == "") ? data1.wig : data.wig
+                data.st = (data.st == null || data.st == "") ? data1.st : data.st
+                data.cm = (data.cm == null || data.cm == "") ? data1.cm : data.cm
+                data.supplier = (data.supplier == null || data.supplier == "") ? data1.supplier : data.supplier
+                data.sici = (data.sici == null || data.sici == "") ? data1.sici : data.sici
+                data.sds = (data.sds == null || data.sds == "") ? data1.sds : data.sds
+                data.jici = (data.jici == null || data.jici == "") ? data1.jici : data.jici
+                data.ppmcNo = (data.ppmcNo == null || data.ppmcNo == "") ? data1.ppmcNo : data.ppmcNo
+                data.colourName = (data.colourName == null || data.colourName == "") ? data1.colourName : data.colourName
+                data.scjp = (data.scjp == null || data.scjp == "") ? data1.scjp : data.scjp
+                data.pden = (data.pden == null || data.pden == "") ? data1.pden : data.pden
+                data.cd = (data.cd == null || data.cd == "") ? data1.cd : data.cd
+                data.ccam = (data.ccam == null || data.ccam == "") ? data1.ccam : data.ccam
+                data.ccab = (data.ccab == null || data.ccab == "") ? data1.ccab : data.ccab
+                data.dsiic = (data.dsiic == null || data.dsiic == "") ? data1.dsiic : data.dsiic
                 compareData.add(data)
             } else {
                 compareData.add(data)
             }
 
 
-
         }
-
 
 
         return compareData
@@ -989,9 +1168,9 @@ class AppController {
             startLevelCol = cells[0].getCol()
             endLevelCol = cells[1].getCol()
             headRowIndex = cells[0].getRow()
-            (cells[0].getCol()..cells[1].getCol()).eachWithIndex {it,index->
+            (cells[0].getCol()..cells[1].getCol()).eachWithIndex { it, index ->
                 //if (!sheet.isColumnHidden(it)) {
-                levelCell[it] = index+1
+                levelCell[it] = index + 1
                 //}
             }
         }
@@ -1061,32 +1240,32 @@ class AppController {
         }
 
 
-        println "物理总行数："+rowCount
+        println "物理总行数：" + rowCount
 
         //重新计算excel的有效行数
-        def flag =true
+        def flag = true
         def endIndex = rowCount - 1
-        while(flag && endIndex>=0){
+        while (flag && endIndex >= 0) {
             def row = sheet.getRow(endIndex)
             //println endIndex
-            if (row!=null) {
+            if (row != null) {
                 //println row.getCell(jcPartNoCell)
-                if (row.getCell(jcPartNoCell).toString()!="") {
+                if (row.getCell(jcPartNoCell).toString() != "") {
                     flag = false
                     break
                 }
             }
             endIndex--
         }
-        rowCount = endIndex+1
-        println "有效行数："+rowCount
+        rowCount = endIndex + 1
+        println "有效行数：" + rowCount
 
         //取得列头信息
-        def headRow = sheet.getRow(headRowIndex - 1)
-        def totalHeadCols = headRow.getLastCellNum()
-        if (totalHeadCols < endColIndex) {
-            totalHeadCols = endColIndex
-        }
+        //def headRow = sheet.getRow(headRowIndex - 1)
+        //def totalHeadCols = headRow.getLastCellNum()
+        //if (totalHeadCols < endColIndex) {
+            //totalHeadCols = endColIndex
+        //}
 
 
         //totalHeadCols = cells[1].getCol()+1
@@ -1119,56 +1298,71 @@ class AppController {
 
         def firstRow = sheet.getRow(headRowIndex)
         def levelSpan = 0
-        levelCell.keySet().eachWithIndex{it,i->
+        println firstRow.getCell(1)
+        levelCell.keySet().eachWithIndex { it, i ->
             def tcell = firstRow.getCell(it)
-            def tvalue = ""
-            if (tcell.cellType == CellType.STRING) {
-                tvalue = tcell.richStringCellValue
-                tvalue = removeStrikeText(workbook, tcell)
-            }
+            //println tcell
 
-            if (tcell.cellType == CellType.NUMERIC) {
-                tvalue = tcell.numericCellValue
-                if (tcell.getCellStyle().getFont().getStrikeout()) {
+            def tvalue = ""
+            if (tcell!=null) {
+                if (tcell.cellType == CellType.STRING) {
+                    tvalue = tcell.richStringCellValue
+                    tvalue = removeStrikeText(workbook, tcell)
+                }
+
+                if (tcell.cellType == CellType.NUMERIC) {
+                    tvalue = tcell.numericCellValue
+                    if (tcell.getCellStyle().getFont().getStrikeout()) {
+                        tvalue = ""
+                    }
+                }
+
+                if (tcell.cellType == CellType.BLANK) {
                     tvalue = ""
                 }
             }
-
-            if (tcell.cellType == CellType.BLANK) {
-                tvalue = ""
-            }
-            if (tvalue!=""){
-                println (tvalue as int)
+            if (tvalue != "") {
+                println(tvalue as int)
                 println levelCell[it]
-                levelSpan = (tvalue as int)-i
+                levelSpan = (tvalue as int) - i
             }
         }
-        println "层级span："+levelSpan
-        //println "列头信息："+headKey
-
-
-
-        if (levelSpan==0) {
-            levelCell.keySet().eachWithIndex{it,index->
-                headKey[it] = index
-            }
-        } else {
-            levelCell.keySet().eachWithIndex{it,index->
-                headKey[it] =  index+1
-            }
-        }
+        println "层级span：" + levelSpan
         println "列头信息："+headKey
 
 
+        if (levelSpan == 0) {
+            levelCell.keySet().eachWithIndex { it, index ->
+                headKey[it] = index
+            }
+        } else {
+            levelCell.keySet().eachWithIndex { it, index ->
+                headKey[it] = index + 1
+            }
+        }
+        println "列头信息：" + headKey
 
+
+        //println headRowIndex
+        //def ff =  sheet.getRow(2)
+        //println ff == null
+        //println ff.zeroHeight
+        //println ff.height
+        //println isRowEmpty(ff)
+        //println sheet.getRow(6).getCell(0)
 
         (headRowIndex..(rowCount - 1)).each { it ->
 
-
             def row = sheet.getRow(it)
 
-            if (row == null || row.zeroHeight) {
+
+            if (row == null || row.zeroHeight || isRowEmpty(row)) {
                 return
+            }
+
+
+            if (row.rowNum == 5) {
+               // println row.getCell(0)
             }
 
             def insertFlag = false
@@ -1199,8 +1393,9 @@ class AppController {
                     key = it1 + splitFlag + headKey[it1]
                 }
 
+
                 if (levelCell[it1] != null) {
-                   key = key + splitFlag + levelFlag
+                    key = key + splitFlag + levelFlag
                 }
 
                 if (partDescCell == it1) {
@@ -1224,9 +1419,14 @@ class AppController {
                 }
                 //key = key.replaceAll("\n", "")
 
-
                 if (cell == null) {
                     properties.add("\"" + key + "\":\"\"")
+
+                    if (key.indexOf(":" + levelFlag) != -1 && headKey[it1] != null) {
+                        rowData.levels.add("{\"" + headKey[it1] + "\":\"\"}")
+                    }
+
+
                 } else {
                     def value = ""
                     if (cell.cellType == CellType.STRING) {
@@ -1289,16 +1489,20 @@ class AppController {
                     if (key.indexOf(":" + infoFlag) != -1) {
                         rowData.info.add(value)
                     }
+
+
+
+
                     if (key.indexOf(":" + levelFlag) != -1 && headKey[it1] != null) {
                         rowData.levels.add("{\"" + headKey[it1] + "\":\"" + (value != null ? value : "") + "\"}")
 
-                        if (value!=null&&value!=""){
+                        if (value != null && value != "") {
                             levelNotEmptyCount++
                         }
 
 
-
                     }
+                    //println rowData.levels
 
                     if (key.indexOf(":" + extensionFlag) != -1) {
 
@@ -1323,13 +1527,13 @@ class AppController {
 
 
             //println rowData.jcPartNo
-            if (rowData.jcPartNo=="") {
-                message.add("第"+(it+1)+"行 JC Part No为空")
+            if (rowData.jcPartNo == "") {
+                message.add("第" + (row.rowNum + 1) + "行 JC Part No为空")
                 //return [code: -1, data: message]
             }
-            println "levelNotEmptyCount:"+levelNotEmptyCount
-            if (levelNotEmptyCount>1) {
-                message.add("第"+(it+1)+"行 层级重复")
+            //println "levelNotEmptyCount:"+levelNotEmptyCount
+            if (levelNotEmptyCount > 1) {
+                message.add("第" + (row.rowNum + 1) + "行 层级重复")
                 insertFlag = false
                 //return [code: -1, data: message]
             }
@@ -1587,7 +1791,7 @@ class AppController {
         Workbook workbook = WorkbookFactory.create(is); //这种方式 Excel 2003/2007/2010 都是可以处理的
         def excelData = loadExcelData(workbook)
 
-        println "exceldata:"+excelData.size()
+        println "exceldata:" + excelData.size()
 
         println "oldVersion:" + oldVersion
 

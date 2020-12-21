@@ -64,9 +64,9 @@ class ProjectController {
             outputStream = response.getOutputStream();
 
             def workbook = new XSSFWorkbook();
-            def template = new FileInputStream(new File("template/template.xlsx"));
+            def template = new FileInputStream(new File("template/newtemplate.xlsx"));
             println template
-            //def workBook = new XSSFWorkbook(new BufferedInputStream(template));
+            workbook = new XSSFWorkbook(new BufferedInputStream(template));
             subProjects.each {
                 def sheetName = it.name
                 def sheetData = []
