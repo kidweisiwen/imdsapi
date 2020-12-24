@@ -64,7 +64,7 @@ class ProjectController {
             outputStream = response.getOutputStream();
 
             def workbook = new XSSFWorkbook();
-            def template = new FileInputStream(new File("template/newtemplate.xlsx"));
+            def template = new FileInputStream(new File("template/newtemplate1.xlsx"));
             println template
             workbook = new XSSFWorkbook(new BufferedInputStream(template));
             subProjects.each {
@@ -120,7 +120,10 @@ class ProjectController {
 
                         }
                         row.add([value: partDesc, width: 20])
-                        row.add([value: Math.ceil(jcPartNo as float), width: 20])
+
+
+
+                        row.add([value: jcPartNo.isFloat() ? Math.ceil(jcPartNo as float) : jcPartNo, width: 20])
                         row.add([value: oemPartNo, width: 20])
 
                         jsonSlurper.parseText(it.info).each { it1 ->
@@ -156,6 +159,9 @@ class ProjectController {
                 }
             }
 
+            def totalSheet = workbook.getNumberOfSheets()
+            workbook.setSheetOrder("Checklist Change Management",totalSheet-1)
+            workbook.setSheetOrder("Change Log",totalSheet-1)
             workbook.write(outputStream);
 
 

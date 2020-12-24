@@ -24,8 +24,14 @@ class SubProjectVersionService {
 
         def headFont = workbook.createFont();
         headFont.setFontHeightInPoints((short) 15);
-        //headFont.setFontName("黑体");
+        headFont.setFontName("Arial");
         headFont.setBold(true);
+
+        def headFont1 = workbook.createFont();
+        headFont1.setFontHeightInPoints((short) 15);
+        headFont1.setFontName("微软雅黑");
+        headFont1.setBold(true);
+
         def headCellStyle = workbook.createCellStyle();
         headCellStyle.setFont(headFont);
         headCellStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -48,6 +54,7 @@ class SubProjectVersionService {
         rowCellStyle.setBorderBottom(BorderStyle.DOUBLE);
 
         def sheet = workbook.createSheet(sheetName);
+
 
         sheetData.eachWithIndex{it,i->
             renderRow(sheet,it,i,headCellStyle,rowCellStyle)
