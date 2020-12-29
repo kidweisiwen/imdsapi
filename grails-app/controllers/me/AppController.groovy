@@ -57,11 +57,14 @@ class AppController {
     def dataVersionService
 
     def isRowEmpty = { row ->
+
         for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
             def cell = row.getCell(c);
+            //println cell.getCellType()
             if (cell != null && cell.getCellType() != CellType.BLANK)
                 return false;
         }
+
         return true;
     }
 
@@ -1151,9 +1154,12 @@ class AppController {
         def sql = new Sql(dataSource)
         def excelData = []
         def sheet = workbook.getSheetAt(0);
+
         int rowCount = sheet.getPhysicalNumberOfRows(); //获取总行数
 
         int sheetCount = workbook.getNumberOfSheets();  //Sheet的数量
+
+
         int startLevelCol
         int endLevelCol
         def rowKeyFlag = [:]
@@ -1298,7 +1304,7 @@ class AppController {
 
         def firstRow = sheet.getRow(headRowIndex)
         def levelSpan = 0
-        println firstRow.getCell(1)
+        //println firstRow.getCell(1)
         levelCell.keySet().eachWithIndex { it, i ->
             def tcell = firstRow.getCell(it)
             //println tcell
@@ -1343,7 +1349,7 @@ class AppController {
         println "列头信息：" + headKey
 
 
-        //println headRowIndex
+        println "headRowIndex "+headRowIndex
         //def ff =  sheet.getRow(2)
         //println ff == null
         //println ff.zeroHeight
@@ -1357,8 +1363,10 @@ class AppController {
 
 
             if (row == null || row.zeroHeight || isRowEmpty(row)) {
+               // println it
                 return
             }
+
 
 
             if (row.rowNum == 5) {
@@ -1537,6 +1545,16 @@ class AppController {
                 insertFlag = false
                 //return [code: -1, data: message]
             }
+
+            if (levelSpan == 0 ) {
+                println "========="+it
+//                println rowLevelIndex
+//                println rowData.level
+                println row.getCell(2)
+            } else {
+
+            }
+
 
 
             if (insertFlag) {
