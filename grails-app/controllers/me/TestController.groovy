@@ -8,6 +8,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.simp.SimpMessageSendingOperations
 
+
+
 class TestController {
 	static responseFormats = ['json', 'xml']
     def weatherService
@@ -35,6 +37,9 @@ class TestController {
         //throw new Exception("dfdfdfdf")
         flash.message = "ddddd"
         def sd = [code:-1,msg:'失败']
+
+
+
 
         //throw new Exception("dfsfsdfsdfs")
         //respond (sd,[status: 400])

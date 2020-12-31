@@ -1153,11 +1153,20 @@ class AppController {
         Workbook workbook = WorkbookFactory.create(is); //这种方式 Excel 2003/2007/2010 都是可以处理的
         def sql = new Sql(dataSource)
         def excelData = []
-        def sheet = workbook.getSheetAt(0);
+        int sheetCount = workbook.getNumberOfSheets();  //Sheet的数量
+        def sheet
+
+        (0..sheetCount-1).find{
+
+            if (!workbook.isSheetHidden(it)) {
+                sheet = workbook.getSheetAt(it)
+                return true
+            }
+
+        }
+
 
         int rowCount = sheet.getPhysicalNumberOfRows(); //获取总行数
-
-        int sheetCount = workbook.getNumberOfSheets();  //Sheet的数量
 
 
         int startLevelCol
@@ -1547,10 +1556,10 @@ class AppController {
             }
 
             if (levelSpan == 0 ) {
-                println "========="+it
+               // println "========="+it
 //                println rowLevelIndex
-//                println rowData.level
-                println row.getCell(2)
+               // println rowData.level
+                //println row.getCell(1)
             } else {
 
             }
@@ -1761,9 +1770,9 @@ class AppController {
 
             //content = content.replace("\\H", " sss ")
 
-            //content = content.replaceAll("\r", " ss")
+            content = content.replaceAll("\r", " \\\\r")
             content = content.replaceAll("'", "''")
-
+            //println content
             def seq = sql.rows("select  nextval('seq_${versionTableName}') as id".toString())
             def id = seq[0].id
             //def uuid = UUID.randomUUID().toString().replace('-', '')
