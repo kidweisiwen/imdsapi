@@ -429,7 +429,7 @@ class AppController {
 
     @Transactional(readOnly = true)
     def exportsubprojectversion() {
-        println 444566
+
         def jsonSlurper = new JsonSlurper()
         def levelCol = ["1", "2", "3", "4", "5", "6"]
         def mainCol = ["part description", "YFAS Part No.","YFAS Part Rev.",
@@ -550,6 +550,16 @@ class AppController {
 
             def color = new XSSFColor(new java.awt.Color(0, 255, 255));
 
+            def dataCellStyle = workbook.createCellStyle();
+            dataCellStyle.setFont(headFont);
+            dataCellStyle.setAlignment(HorizontalAlignment.LEFT);
+            dataCellStyle.setVerticalAlignment(dataCellStyle.getVerticalAlignmentEnum().BOTTOM);
+            dataCellStyle.setWrapText(true);
+            dataCellStyle.setBorderTop(BorderStyle.THIN);
+            dataCellStyle.setBorderLeft(BorderStyle.THIN);
+            dataCellStyle.setBorderRight(BorderStyle.THIN);
+            dataCellStyle.setBorderBottom(BorderStyle.THIN);
+
             def headCellStyle0 = workbook.createCellStyle();
             headCellStyle0.setFont(headFont);
             headCellStyle0.setAlignment(HorizontalAlignment.LEFT);
@@ -632,9 +642,9 @@ class AppController {
             rowCellStyle.setBorderRight(BorderStyle.THIN);
             rowCellStyle.setBorderBottom(BorderStyle.THIN);
 
-            def sheet = workbook.getSheetAt(0)
+            //def sheet = workbook.getSheetAt(0)
             //workbook.setSheetName(0,sheetName)
-            //def sheet = workbook.createSheet(sheetName);
+            def sheet = workbook.createSheet(sheetName);
 
             def head = sheet.createRow(0);
             head.setHeight((short) 1520)
@@ -653,7 +663,7 @@ class AppController {
             }
 
             renderCol(sheet, headCellStyle, head, ["Pos",""], 2)
-            renderCol(sheet, headCellStyle, head, levelCol, 2)
+            renderCol(sheet, headCellStyle, head, levelCol, 1)
             renderCol(sheet, headCellStyle, head, mainCol, 10)
             renderCol(sheet, headCellStyle1, head, mainCol1, 10)
             renderCol(sheet, headCellStyle2, head, mainCol2, 10)
@@ -695,37 +705,37 @@ class AppController {
 
                 }
 
-                renderCol(sheet, headCellStyle, row, ['',''], 10)
+                renderCol(sheet, dataCellStyle, row, ['',''], 3)
 
-                renderCol(sheet, headCellStyle, row, levelCol, 10)
+                renderCol(sheet, dataCellStyle, row, levelCol, 3)
 
 
                 mainCol = []
                 mainCol.add(partDesc)
-                renderCol(sheet, headCellStyle, row, mainCol, 30)
+                renderCol(sheet, dataCellStyle, row, mainCol, 30)
 
                 mainCol = []
                 mainCol.add(jcPartNo.isFloat() ? Math.ceil(jcPartNo as float) : jcPartNo)
                 mainCol.add("")
                 mainCol.add(oemPartNo)
-                renderCol(sheet, headCellStyle, row, mainCol, 10)
+                renderCol(sheet, dataCellStyle, row, mainCol, 10)
 
 
-                renderCol(sheet, headCellStyle1, row, [""], 10)
-                renderCol(sheet, headCellStyle2, row, [""], 10)
-                renderCol(sheet, headCellStyle3, row, ["","","","","","","","","","",""], 10)
+                renderCol(sheet, dataCellStyle, row, [""], 10)
+                renderCol(sheet, dataCellStyle, row, [""], 10)
+                renderCol(sheet, dataCellStyle, row, ["","","","","","","","","","",""], 10)
 
-                renderCol(sheet, headCellStyle, row, [it.wig,""], 12)
-                renderCol(sheet, headCellStyle4, row, [it.st,it.cm], 12)
+                renderCol(sheet, dataCellStyle, row, [it.wig,""], 12)
+                renderCol(sheet, dataCellStyle, row, [it.st,it.cm], 12)
 
-                renderCol(sheet, headCellStyle3, row, [""], 10)
-                renderCol(sheet, headCellStyle, row, [""], 10)
-                renderCol(sheet, headCellStyle3, row, ["",""], 10)
-                renderCol(sheet, headCellStyle1, row, ["",""], 10)
-                renderCol(sheet, headCellStyle, row, [it.supplier], 10)
-                renderCol(sheet, headCellStyle3, row, ["","","",""], 10)
-                renderCol(sheet, headCellStyle, row, [it.sici,it.sds,it.jici,it.ppmcNo,it.colourName,it.scjp,it.pden,it.cd], 10)
-                renderCol(sheet, headCellStyle0, row, [it.ccam,it.ccab,it.dsiic], 10)
+                renderCol(sheet, dataCellStyle, row, [""], 10)
+                renderCol(sheet, dataCellStyle, row, [""], 10)
+                renderCol(sheet, dataCellStyle, row, ["",""], 10)
+                renderCol(sheet, dataCellStyle, row, ["",""], 10)
+                renderCol(sheet, dataCellStyle, row, [it.supplier], 10)
+                renderCol(sheet, dataCellStyle, row, ["","","",""], 10)
+                renderCol(sheet, dataCellStyle, row, [it.sici,it.sds,it.jici,it.ppmcNo,it.colourName,it.scjp,it.pden,it.cd], 10)
+                renderCol(sheet, dataCellStyle, row, [it.ccam,it.ccab,it.dsiic], 10)
                 infoCol = []
                 jsonSlurper.parseText(it.info).each { it1 ->
                     if (it1?.trim()) {
@@ -1011,7 +1021,7 @@ class AppController {
             def data1 = [:]
             oldData.find { it ->
 
-                println it
+                //println it
                 def parent = jsonSlurper.parseText(it.parent)
 
 
@@ -1189,6 +1199,10 @@ class AppController {
                 //}
             }
         }
+
+
+
+
         println "levelCell"
         println levelCell
         //查找part desc标志单元格
@@ -1371,12 +1385,14 @@ class AppController {
             def row = sheet.getRow(it)
 
 
-            if (row == null || row.zeroHeight || isRowEmpty(row)) {
-               // println it
+//            if (row == null || row.zeroHeight || isRowEmpty(row)) {
+//                return
+//            }
+
+            if (row == null || isRowEmpty(row)) {
+                // println it
                 return
             }
-
-
 
             if (row.rowNum == 5) {
                // println row.getCell(0)
@@ -1543,6 +1559,7 @@ class AppController {
             def insert = "insert into data_result_" + subProjectId + "(content) values('" + content + "')"
 
 
+
             //println rowData.jcPartNo
             if (rowData.jcPartNo == "") {
                 message.add("第" + (row.rowNum + 1) + "行 JC Part No为空")
@@ -1556,15 +1573,33 @@ class AppController {
             }
 
             if (levelSpan == 0 ) {
+                if (rowData.level != null && rowData.level!="") {
+                    println (rowData.level as float)
+                    println rowLevelIndex-startLevelCol
+
+                    if ((rowData.level as float)!=(rowLevelIndex-startLevelCol)) {
+                        message.add("第" + (row.rowNum + 1) + "行 层级错误")
+                        insertFlag = false
+                    }
+
+                }
                // println "========="+it
-//                println rowLevelIndex
+                //  println rowLevelIndex
                // println rowData.level
                 //println row.getCell(1)
             } else {
+                if (rowData.level != null && rowData.level!="") {
+                    println (rowData.level as float)
+                    println rowLevelIndex-startLevelCol+1
 
+                    if ((rowData.level as float)!=(rowLevelIndex-startLevelCol+1)) {
+                        message.add("第" + (row.rowNum + 1) + "行 层级错误")
+                        insertFlag = false
+                    }
+                }
             }
 
-
+            //println "rowData.level: "+rowData.level
 
             if (insertFlag) {
                 if (rowData.level == null) {
@@ -1630,7 +1665,7 @@ class AppController {
                 //println rowData._PARENT
                 //println rowData.jcPartNo
 
-                //println rowData
+                println rowData
 
                 excelData.add(rowData)
                 //sql.execute(insert)

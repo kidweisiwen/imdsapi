@@ -464,8 +464,15 @@ class SubprojectversionController {
             }
         }
 
-        partDesc = partDesc.replaceAll("\\", " \\\\")
-        partDesc = partDesc.replaceAll("\n", " \\\\n")
+        if (partDesc) {
+            partDesc = partDesc.replaceAll("\\\\", " \\\\\\\\")
+            partDesc = partDesc.replaceAll("\n", " \\\\n")
+        }
+
+
+
+
+
 
         //常规字段
         content.add("\"levels\":[" + levels.join(",") + "]")

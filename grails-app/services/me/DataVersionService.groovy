@@ -99,6 +99,7 @@ class DataVersionService {
         """.toString()
         //println querySql
         def rows = sql.rows(querySql,subProjectId)
+        //println "rows size:"+rows.size()
         return rows
     }
 }
